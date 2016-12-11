@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<ExtensionList>
+    <Extension Id="com.example.test">
+        <HostList>
+           
+            <!-- Comment Host tags according to the apps you want your panel to support -->
+            
+            <!-- Photoshop -->
+            <Host Name="PHXS" Port="9060"/>
+            
+            <!-- Illustrator -->
+            <Host Name="ILST" Port="9060"/>
+ 
+            <!-- InDesign -->
+            <Host Name="IDSN" Port="9060" />
+            
+            <!-- Premiere -->
+            <Host Name="PPRO" Port="9060" />
+            
+            <!-- AfterEffects -->
+            <Host Name="AEFT" Port="9060" />
+            
+            <!-- PRELUDE -->
+            <Host Name="PRLD" Port="9060" />
+            
+            <!-- FLASH Pro -->
+            <Host Name="FLPR" Port="9060" />
+                        
+        </HostList>
+    </Extension>
+</ExtensionList>

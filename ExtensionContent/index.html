@@ -1,0 +1,164 @@
+<!doctype html>
+
+<html>
+<head>
+<meta charset="utf-8">
+<script src="./ext.js"></script>
+<script src="./html5kellycolorpicker.js"></script>
+<script src="./lib/CSInterface-4.0.0.js"></script>
+
+<link id="ppstyle" rel="stylesheet" type="text/css" href="./style.css">
+<title>KellyColorPicker</title>
+</head>
+
+<body onLoad="createGUI()" style=" ">
+
+<canvas id="picker"></canvas>
+
+</body>
+
+<script>
+
+/*
+ * ToDo : Find how to prevent click event on widget body (when you use tablet, it may freez to show click animation - its relally annoying) 
+ */
+
+var body = document.getElementsByTagName('body')[0];
+
+//left - foreground, right - background
+var foreground = false; // foreground color from photoshop is restored
+var background = false; // same for background
+
+// sync color changes from out enviroment of photoshop
+var getColorFromPhotoshop = false; // timer
+var syncReady = 2;
+
+// enables when color loads from photoshop, 
+// to prevent double color change by "change" event in colorpiker
+
+var photoshopChangeColor = false;
+
+function setPhotoshopColor(picker, align) {
+	var colorSaver = picker.getColorSaver(align);
+
+	var csInterface = new CSInterface();
+
+	var sc = 'var color = new SolidColor; ';
+		sc += 'color.rgb.red = ' + colorSaver.rgb.r + ';';
+		sc += 'color.rgb.green = ' + colorSaver.rgb.g  + ';';
+		sc += 'color.rgb.blue = ' + colorSaver.rgb.b + ';';
+		
+		if (align == 'left') {
+			sc += 'app.foregroundColor = color; ';	
+		} else {
+			sc += 'app.backgroundColor = color; ';
+		}
+		
+		csInterface.evalScript(sc);		
+}
+
+function initOnChangeEvent() {
+	if (foreground && background) {
+		
+		colorPicker.addUserEvent("change",  function (handler) {
+			if (!photoshopChangeColor) {
+				setPhotoshopColor(handler, 'left');
+				setPhotoshopColor(handler, 'right');	
+			}
+
+		});
+		
+		enableColorSync();
+	}	
+}
+
+function disableColorSync() {
+	if (getColorFromPhotoshop) {
+		clearTimeout(getColorFromPhotoshop);	
+		getColorFromPhotoshop = false;
+	}
+}
+
+function enableColorSync() {
+	
+	if (getColorFromPhotoshop) return;
+	
+	 getColorFromPhotoshop = setInterval(function() {
+		 
+		if (syncReady != 2) return;
+		
+		syncReady = 0;
+		var csInterface = new CSInterface();
+		  
+		csInterface.evalScript('var rgb = "rgb(" + app.foregroundColor.rgb.red + "," + app.foregroundColor.rgb.green + "," + app.foregroundColor.rgb.blue + ")"; rgb;', function (res) {  
+			 photoshopChangeColor = true;
+			 colorPicker.setColorForColorSaver(res, 'left'); 
+			 syncReady += 1;
+			 photoshopChangeColor = false;
+		});
+		 
+		csInterface.evalScript('var rgb = "rgb(" + app.backgroundColor.rgb.red + "," + app.backgroundColor.rgb.green + "," + app.backgroundColor.rgb.blue + ")"; rgb;', function (res) {  
+			 photoshopChangeColor = true;
+			 colorPicker.setColorForColorSaver(res, 'right');  
+			 syncReady += 1;
+			 photoshopChangeColor = false;
+		});	 
+		
+	}, 1000);	
+}
+
+var cfgMethod = localStorage.getItem('kelly_method');
+
+if (!cfgMethod) cfgMethod = 'quad';
+
+var colorPicker = new KellyColorPicker(
+	{
+		place : 'picker', 
+		size : 150, 
+		resizeWith : body, 
+		colorSaver : true,
+		methodSwitch : true,
+		method : cfgMethod,
+		changeCursor : false, // cursor replace bad work since CS 2016
+		userEvents : {
+			setmethod : function (handler, newMethod) {
+				localStorage.setItem('kelly_method', newMethod);
+				
+			},
+			selectcolorsaver : function () {
+
+			},		
+			mousemoveh : function (event, handler, dot) {
+				disableColorSync();
+			},
+			mouseuph : function (event, handler, dot) {
+				enableColorSync();
+			},
+			mousemovesv : function (event, handler, dot) {
+				disableColorSync();
+			},
+			mouseupsv : function (event, handler, dot) {
+				enableColorSync();
+			},
+		}
+	}
+);
+
+var csInterface = new CSInterface();
+
+// restore colors from photoshop, and later detect changes
+
+csInterface.evalScript('var rgb = "rgb(" + app.foregroundColor.rgb.red + "," + app.foregroundColor.rgb.green + "," + app.foregroundColor.rgb.blue + ")"; rgb;', function (res) {  
+	 colorPicker.setColorForColorSaver(res, 'left');   
+	 foreground = res;
+	 initOnChangeEvent();
+});
+
+csInterface.evalScript('var rgb = "rgb(" + app.backgroundColor.rgb.red + "," + app.backgroundColor.rgb.green + "," + app.backgroundColor.rgb.blue + ")"; rgb;', function (res) {  
+	 colorPicker.setColorForColorSaver(res, 'right');
+	 background = res;
+	 initOnChangeEvent();
+});	 
+
+</script>
+</html>
