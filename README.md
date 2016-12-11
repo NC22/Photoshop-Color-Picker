@@ -1,5 +1,7 @@
-# Photoshop-Color-Picker
+# Photoshop-Color-Picker v1.0b
 Simple HSV color picker for Photoshop. Based on my <a href="https://github.com/NC22/HTML5-Color-Picker">HTML5 widget</a>
+
+Download latest version you can in Release folder
 
 <img src="https://raw.githubusercontent.com/NC22/Photoshop-Color-Picker/master/widget.png">
 
