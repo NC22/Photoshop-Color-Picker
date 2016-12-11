@@ -1,6 +1,7 @@
 # Photoshop-Color-Picker
 Simple HSV color picker for Photoshop. Based on my <a href="https://github.com/NC22/HTML5-Color-Picker">HTML5 widget</a>
 
+<img src="https://raw.githubusercontent.com/NC22/Photoshop-Color-Picker/master/widget.png">
 
 Some notices about how to compile the extension :
 
